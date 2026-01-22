@@ -2,7 +2,7 @@
 -- FeedbackHub Database Schema
 -- ============================================
 
--- 反馈主表
+-- Main feedback table
 CREATE TABLE IF NOT EXISTS feedback (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
@@ -10,23 +10,23 @@ CREATE TABLE IF NOT EXISTS feedback (
     author TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
-    -- AI 分析结果
+    -- AI analysis results
     sentiment TEXT CHECK(sentiment IN ('positive', 'neutral', 'negative')),
     sentiment_score REAL CHECK(sentiment_score BETWEEN 0 AND 1),
     category TEXT CHECK(category IN ('bug', 'feature', 'performance', 'documentation', 'other')),
     urgency_score INTEGER CHECK(urgency_score BETWEEN 1 AND 10),
     
-    -- 产品和内容分析
+    -- Product area and content analysis
     product_area TEXT,
     summary TEXT,
-    keywords TEXT,  -- 逗号分隔的关键词列表
+    keywords TEXT,  -- Comma-separated list of keywords
     
-    -- 元数据
+    -- Metadata
     analyzed BOOLEAN DEFAULT 0,
     analyzed_at TIMESTAMP
 );
 
--- Cloudflare 产品线参考表
+-- Cloudflare product areas reference table
 CREATE TABLE IF NOT EXISTS product_areas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS product_areas (
     category TEXT NOT NULL
 );
 
--- 预填充产品数据
+-- Pre-populate product data
 INSERT OR IGNORE INTO product_areas (name, display_name, category) VALUES
     ('workers', 'Cloudflare Workers', 'compute'),
     ('pages', 'Cloudflare Pages', 'compute'),
@@ -56,7 +56,7 @@ INSERT OR IGNORE INTO product_areas (name, display_name, category) VALUES
     ('turnstile', 'Turnstile', 'security'),
     ('other', 'Other/General', 'other');
 
--- 性能优化索引
+-- Performance optimization indexes
 CREATE INDEX IF NOT EXISTS idx_feedback_source ON feedback(source);
 CREATE INDEX IF NOT EXISTS idx_feedback_sentiment ON feedback(sentiment);
 CREATE INDEX IF NOT EXISTS idx_feedback_category ON feedback(category);

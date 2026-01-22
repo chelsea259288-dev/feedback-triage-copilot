@@ -5,24 +5,24 @@
 import type { Env, AnalyticsSummary } from '../types';
 
 export async function getAnalytics(env: Env): Promise<AnalyticsSummary> {
-    // 总数统计
+    // Total count
     const totalResult = await env.DB.prepare('SELECT COUNT(*) as count FROM feedback').first();
     const total_feedback = totalResult?.count as number || 0;
     
-    // 今日统计
+    // Today's count
     const todayResult = await env.DB.prepare(`
         SELECT COUNT(*) as count FROM feedback 
         WHERE DATE(created_at) = DATE('now')
     `).first();
     const today_count = todayResult?.count as number || 0;
     
-    // 未分析统计
+    // Unanalyzed count
     const unanalyzedResult = await env.DB.prepare(`
         SELECT COUNT(*) as count FROM feedback WHERE analyzed = 0
     `).first();
     const unanalyzed_count = unanalyzedResult?.count as number || 0;
     
-    // 情感分布
+    // Sentiment distribution
     const sentimentDist = await env.DB.prepare(`
         SELECT sentiment, COUNT(*) as count 
         FROM feedback 
@@ -41,7 +41,7 @@ export async function getAnalytics(env: Env): Promise<AnalyticsSummary> {
         }
     });
     
-    // 分类分布
+    // Category distribution
     const categoryDist = await env.DB.prepare(`
         SELECT category, COUNT(*) as count 
         FROM feedback 
@@ -54,7 +54,7 @@ export async function getAnalytics(env: Env): Promise<AnalyticsSummary> {
         category_distribution[row.category] = row.count;
     });
     
-    // 产品线分布
+    // Product area distribution
     const productDist = await env.DB.prepare(`
         SELECT product_area, COUNT(*) as count 
         FROM feedback 
@@ -68,10 +68,10 @@ export async function getAnalytics(env: Env): Promise<AnalyticsSummary> {
         product_area_distribution[row.product_area] = row.count;
     });
     
-    // 热门关键词（简化版）
+    // Top keywords (simplified version)
     const top_keywords: Array<{ keyword: string; count: number }> = [];
     
-    // 紧急反馈
+    // Urgent feedback
     const urgentResult = await env.DB.prepare(`
         SELECT id, summary, urgency_score, product_area
         FROM feedback
