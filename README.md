@@ -1,182 +1,282 @@
-# FeedbackHub - Cloudflare 产品反馈智能分析平台
+# Feedback Triage Copilot
 
-基于 Cloudflare Developer Platform 构建的智能反馈聚合和分析工具。
+> AI-powered feedback aggregation and intelligent triage dashboard built on Cloudflare Developer Platform
 
-## 🏗️ 架构
+[![Deployed on Cloudflare Workers](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Workers-F38020?logo=cloudflare&logoColor=white)](https://feedback-triage.chelsea259288.workers.dev)
 
-### Cloudflare 产品使用
+## 🌟 Overview
 
-- **Cloudflare Workers**: 托管前端和 API
-- **D1 Database**: 存储反馈数据（SQLite）
-- **Workers AI**: Llama 3 模型进行情感分析、分类、摘要生成
-- **KV (可选)**: 缓存分析结果
+Feedback Triage Copilot is a production-ready feedback management system that demonstrates deep integration across Cloudflare's Developer Platform. It automatically ingests, analyzes, and organizes user feedback using AI, providing product teams with actionable insights through semantic search and intelligent categorization.
 
-### 技术栈
+**Live Demo:** https://feedback-triage.chelsea259288.workers.dev
 
-- TypeScript
-- Vanilla JavaScript (前端)
+## 🏗️ Architecture
+
+### Cloudflare Products Used
+
+- **Cloudflare Workers**: Edge compute for API and frontend hosting
+- **D1 Database**: Serverless SQL database for structured feedback storage
+- **Workflows**: Durable execution for reliable async processing pipeline
+- **Workers AI**: On-demand inference with Llama 3.3 70B for analysis
+- **R2 Object Storage**: Unlimited storage for full-text corpus
+- **AI Search (AutoRAG)**: Semantic search and RAG-based question answering
+
+### Technology Stack
+
+- TypeScript (Backend)
+- Vanilla JavaScript (Frontend)
 - SQL (D1 Database)
+- Llama 3.3 70B (AI Model)
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 安装依赖
+### Prerequisites
+
+- Node.js 18+ and npm
+- Cloudflare account with Workers paid plan
+- Wrangler CLI installed (`npm install -g wrangler`)
+
+### 1. Clone and Install
 
 ```bash
-cd feedback-hub
+git clone https://github.com/chelsea259288-dev/feedback-triage-copilot.git
+cd feedback-triage-copilot
 npm install
 ```
 
-### 2. 创建 D1 数据库
+### 2. Create D1 Database
 
 ```bash
 npx wrangler d1 create feedback_db
 ```
 
-复制输出中的 `database_id`，更新 `wrangler.toml` 中的 `database_id`。
+Copy the `database_id` from the output and update `wrangler.toml`:
 
-### 3. (可选) 创建 KV 命名空间
-
-```bash
-npx wrangler kv:namespace create CACHE
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "feedback_db"
+database_id = "YOUR_DATABASE_ID_HERE"
 ```
 
-复制输出中的 `id`，更新 `wrangler.toml` 中的 KV `id`。
-
-### 4. 初始化数据库 Schema
+### 3. Initialize Database Schema
 
 ```bash
+# Local database
 npx wrangler d1 execute feedback_db --local --file=./migrations/0001_initial_schema.sql
-```
+npx wrangler d1 execute feedback_db --local --file=./migrations/0002_triage_schema.sql
 
-### 5. 本地开发
-
-```bash
-npx wrangler dev
-```
-
-访问 `http://localhost:8787`
-
-### 6. 生成测试数据
-
-访问 `http://localhost:8787/api/seed` 生成 150 条 Mock 数据。
-
-### 7. 部署到生产
-
-```bash
-# 先初始化远程数据库
+# Remote database (for production)
 npx wrangler d1 execute feedback_db --remote --file=./migrations/0001_initial_schema.sql
-
-# 部署 Worker
-npx wrangler deploy
-
-# 生成生产数据
-curl https://your-worker.workers.dev/api/seed
+npx wrangler d1 execute feedback_db --remote --file=./migrations/0002_triage_schema.sql
 ```
 
-## 📡 API 端点
-
-### GET /
-返回 Dashboard HTML 页面
-
-### GET /api/feedback
-获取反馈列表
-
-**查询参数**:
-- `source`: 过滤来源 (discord, github, twitter, support)
-- `sentiment`: 过滤情感 (positive, neutral, negative)
-- `category`: 过滤分类 (bug, feature, performance, documentation, other)
-- `product_area`: 过滤产品线 (workers, d1, pages, etc.)
-- `limit`: 限制数量 (默认 50)
-
-### POST /api/feedback
-创建新反馈并触发 AI 分析
-
-**请求体**:
-```json
-{
-  "content": "反馈内容",
-  "source": "discord",
-  "author": "username"
-}
-```
-
-### GET /api/analytics
-获取汇总分析数据
-
-### POST /api/analyze-batch
-批量分析未分析的反馈（最多 20 条）
-
-### GET /api/seed
-生成 Mock 数据（仅开发用）
-
-## 🎨 核心功能
-
-### AI 自动分析
-- ✅ 情感分析 (positive/neutral/negative + 分数)
-- ✅ 分类识别 (bug/feature/performance/documentation)
-- ✅ 产品线识别 (19 种 Cloudflare 产品)
-- ✅ 紧急程度评分 (1-10)
-- ✅ 智能摘要生成
-- ✅ 关键词提取 (5-10 个)
-
-### Dashboard 可视化
-- 📊 统计概览卡片
-- 📦 产品线分布图
-- 🔥 热门关键词云
-- 💬 反馈列表（支持过滤）
-
-## 📊 数据库 Schema
-
-### feedback 表
-主要字段包括：content, source, sentiment, category, urgency_score, product_area, summary, keywords 等。
-
-### product_areas 表
-预填充 19 种 Cloudflare 产品参考数据。
-
-## 🔧 常用命令
+### 4. (Optional) Create R2 Bucket for AI Search
 
 ```bash
-# 本地开发
+# Enable R2 in dashboard first: https://dash.cloudflare.com/r2
+npx wrangler r2 bucket create feedback-triage-corpus
+```
+
+### 5. (Optional) Create AI Search Instance
+
+Follow the [R2_AI_SEARCH_SETUP.md](./R2_AI_SEARCH_SETUP.md) guide to set up AI Search for semantic search capabilities.
+
+### 6. Local Development
+
+```bash
 npm run dev
+```
 
-# 部署
+Visit `http://localhost:8787`
+
+### 7. Generate Test Data
+
+Visit `http://localhost:8787/api/seed` to generate 150 mock feedback entries.
+
+### 8. Deploy to Production
+
+```bash
 npm run deploy
-
-# 创建数据库
-npm run db:create
-
-# 初始化 schema
-npm run db:migrate
-
-# 本地 schema 初始化
-npm run db:migrate:local
-
-# 创建 KV
-npm run kv:create
 ```
 
-## 📝 项目结构
+After deployment, seed production data:
+
+```bash
+curl https://feedback-triage.YOUR_SUBDOMAIN.workers.dev/api/seed
+```
+
+## 📡 API Endpoints
+
+### Core Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Dashboard HTML page |
+| `GET` | `/api/inbox` | Get filtered feedback list |
+| `GET` | `/api/feedback/:id` | Get feedback details with AI analysis |
+| `POST` | `/api/ingest` | Ingest new feedback and trigger workflow |
+| `GET` | `/api/themes` | Get aggregated themes |
+| `GET` | `/api/digest` | Get summary digest by time range |
+
+### Search & AI Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/search?q=...` | Semantic search over feedback |
+| `POST` | `/api/ask` | RAG-based Q&A with source attribution |
+| `GET` | `/api/feedback/:id/similar` | Find similar feedback items |
+
+### Utility Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/seed` | Generate mock data (dev only) |
+| `GET` | `/api/corpus/sync` | Sync D1 to R2 corpus for AI Search |
+
+## 🎨 Core Features
+
+### AI-Powered Analysis
+
+Automatically analyzes each feedback entry for:
+
+- ✅ **Sentiment:** Positive/Neutral/Negative with confidence score
+- ✅ **Urgency:** P0 (critical) to P3 (enhancement)
+- ✅ **Category:** Bug, Feature Request, Docs, Performance
+- ✅ **Product Area:** Auto-detects 19 Cloudflare products
+- ✅ **Theme:** Actionable short phrase (e.g., "Wrangler deploy timeout errors")
+- ✅ **Summary:** 1-2 sentence summary
+- ✅ **Next Action:** Recommended triage action
+
+### Dashboard Features
+
+- 📊 **Stat Cards:** Total feedback, P0 count, today's submissions, unanalyzed count
+- 🔍 **Advanced Filters:** Source, product area, category, urgency
+- 📦 **Theme Aggregation:** Automatic grouping by common themes
+- 💬 **Inbox View:** Sortable, filterable feedback list
+- 🔎 **Semantic Search:** Natural language querying
+- 🤖 **Ask (RAG):** Question answering with source citations
+
+### Workflow Pipeline
 
 ```
-feedback-hub/
+Ingest → Deduplicate → AI Analyze → Persist → Aggregate → Write Corpus
+```
+
+Each step is:
+- **Idempotent:** Safe to retry
+- **Isolated:** Errors don't break the entire pipeline
+- **Observable:** Trackable with Workflows API
+
+## 📊 Database Schema
+
+### `raw_feedback`
+Stores original feedback submissions with metadata (source, URL, author, timestamps).
+
+### `ai_triage`
+Stores AI analysis results (sentiment, urgency, category, theme, summary, next action).
+
+### `duplicates`
+Links duplicate feedback entries based on content similarity.
+
+### `theme_aggregates`
+Materialized view for theme-based analytics (count, P0 count, sentiment ratio, last seen).
+
+## 🔧 NPM Scripts
+
+```bash
+# Development
+npm run dev                 # Start local dev server
+
+# Deployment
+npm run deploy              # Deploy to production
+
+# Database
+npm run db:migrate:local    # Apply migrations locally
+npm run db:migrate:remote   # Apply migrations to production
+npm run db:query:local      # Interactive local SQL shell
+npm run db:query:remote     # Interactive remote SQL shell
+
+# TypeScript
+npm run build               # Compile TypeScript
+npm run check               # Type check
+```
+
+## 📁 Project Structure
+
+```
+feedback-triage-copilot/
 ├── src/
-│   ├── index.ts              # Worker 主入口
-│   ├── types.ts              # TypeScript 类型定义
-│   ├── router.ts             # API 路由处理
-│   ├── mock-data.ts          # Mock 数据生成器
+│   ├── index.ts                # Worker entry point
+│   ├── router.ts               # API route handlers
+│   ├── workflow.ts             # Workflows pipeline definition
+│   ├── types.ts                # TypeScript type definitions
+│   ├── mock-data.ts            # Mock data generator
 │   └── services/
-│       ├── ai-analyzer.ts    # Workers AI 分析服务
-│       ├── analytics.ts      # 数据统计服务
-│       └── db-queries.ts     # D1 查询封装
+│       ├── ai-analyzer.ts      # Workers AI integration
+│       ├── ai-search.ts        # AI Search integration
+│       ├── analytics.ts        # Aggregation and stats
+│       └── db-queries.ts       # D1 query helpers
 ├── public/
-│   └── index.html            # Dashboard 前端
+│   └── index.html              # Dashboard frontend
 ├── migrations/
-│   └── 0001_initial_schema.sql
-├── wrangler.toml
-├── package.json
-└── README.md
+│   ├── 0001_initial_schema.sql # Base schema
+│   └── 0002_triage_schema.sql  # Triage tables
+├── docs/
+│   └── bindings-screenshot.png # Architecture diagram
+├── wrangler.toml               # Cloudflare configuration
+├── SUBMISSION.md               # Challenge submission doc
+├── FRICTION_LOG.md             # Developer friction points
+└── README.md                   # This file
 ```
+
+## 🐛 Troubleshooting
+
+### Workflows Not Working in Local Dev
+
+**Issue:** `env.TRIAGE_WORKFLOW.create()` works but instances are not found.
+
+**Solution:** Unlike D1/R2, Workflows require deployment before local testing:
+```bash
+npm run deploy
+# Then run local dev
+npm run dev
+```
+
+### R2 Bucket Creation Fails
+
+**Issue:** `wrangler r2 bucket create` fails with "Please enable R2 through dashboard"
+
+**Solution:** 
+1. Visit https://dash.cloudflare.com/r2
+2. Complete R2 onboarding (may require payment method)
+3. Retry bucket creation
+
+### AI Search Not Returning Results
+
+**Issue:** Search returns fallback keyword results instead of semantic results.
+
+**Solution:** 
+1. Ensure R2 corpus is populated: `curl https://YOUR_WORKER.workers.dev/api/corpus/sync`
+2. Verify AI Search binding in `wrangler.toml`
+3. Check AI Search instance name matches deployed instance
+
+## 📝 Documentation
+
+- [Submission Document](./SUBMISSION.md) - Full challenge submission with architecture and friction points
+- [Friction Log](./FRICTION_LOG.md) - Detailed developer experience feedback (English version in SUBMISSION.md)
+- [AI Search Setup Guide](./R2_AI_SEARCH_SETUP.md) - Step-by-step AI Search configuration
+
+## 🤝 Contributing
+
+This is a challenge submission project, but feedback and suggestions are welcome! Please open an issue to discuss potential improvements.
 
 ## 📄 License
 
-MIT
+MIT License - see [LICENSE](./LICENSE) for details.
+
+---
+
+**Built with ❤️ on Cloudflare Developer Platform**
+
+[Live Demo](https://feedback-triage.chelsea259288.workers.dev) • [GitHub](https://github.com/chelsea259288-dev/feedback-triage-copilot) • [Submission Doc](./SUBMISSION.md)
