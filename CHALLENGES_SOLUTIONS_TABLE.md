@@ -1,4 +1,4 @@
-# Challenges & Solutions — Video Presentation
+# Challenges & Solutions 
 
 **Context:** Key technical and product challenges encountered while building Feedback Triage Copilot on Cloudflare Developer Platform.
 
