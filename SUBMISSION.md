@@ -1,20 +1,20 @@
-# Feedback Triage Copilot - Cloudflare Developer Platform Challenge Submission
+# Feedback Triage Copilot 
 
 > An AI-powered feedback aggregation and intelligent triage dashboard built entirely on Cloudflare's Developer Platform
 
 ---
 
-## 📌 Project Links
+## Project Links
 
 ### Live Demo
-**🚀 Deployed Application:** https://feedback-triage.chelsea259288.workers.dev
+** Deployed Application:** https://feedback-triage.chelsea259288.workers.dev
 
 ### Source Code
-**💻 GitHub Repository:** https://github.com/chelsea259288-dev/feedback-triage-copilot
+** GitHub Repository:** https://github.com/chelsea259288-dev/feedback-triage-copilot
 
 ---
 
-## 🎯 Product Insights: Friction Points & Suggestions
+##  Product Insights: Friction Points & Suggestions
 
 Based on hands-on experience building this prototype, here are the key friction points encountered and actionable suggestions for improving the Cloudflare Developer Platform:
 
