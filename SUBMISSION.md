@@ -75,7 +75,7 @@ Based on hands-on experience building this prototype, here are the key friction 
    ⚡ Bindings:
    - D1 (feedback_db): using local database
    - R2 (CORPUS): using local bucket
-   - Workflows (TRIAGE_WORKFLOW): ⚠️  REQUIRES DEPLOYMENT
+   - Workflows (TRIAGE_WORKFLOW): REQUIRES DEPLOYMENT
      → Run 'wrangler deploy' first to enable Workflows in local dev
    ```
 
@@ -91,7 +91,7 @@ Based on hands-on experience building this prototype, here are the key friction 
 
 3. **Documentation Update:**
    - Add prominent callout in Workflows Quick Start:
-     > ⚠️ **Unlike D1/R2, Workflows require deployment before local testing**
+     > **Unlike D1/R2, Workflows require deployment before local testing**
    - Provide "minimal Workflow + local dev" example with deployment step highlighted
 
 ---
@@ -161,10 +161,10 @@ Based on hands-on experience building this prototype, here are the key friction 
 
 **What Worked:**
 ```typescript
-// ❌ Before: Generic prompt
+// Before: Generic prompt
 "Analyze this feedback and extract key information"
 
-// ✅ After: Specific format + examples
+// After: Specific format + examples
 const prompt = `Analyze feedback and return JSON with exact fields:
 {
   "urgency": "P0|P1|P2|P3",  // P0=critical outage, P1=major bug, P2=minor, P3=enhancement
@@ -335,7 +335,8 @@ This prototype demonstrates deep integration across 6 Cloudflare Developer Platf
 
 ### Workers Bindings Configuration
 
-![Bindings Screenshot](docs/bindings-screenshot.png)
+<img width="3394" height="1706" alt="image" src="https://github.com/user-attachments/assets/4dbc9fbe-4969-4c0b-a55a-359a85066844" />
+
 
 **Configured Bindings:**
 ```toml
