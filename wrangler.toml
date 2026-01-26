@@ -28,7 +28,7 @@ name = "feedback-triage-workflow"
 binding = "TRIAGE_WORKFLOW"
 class_name = "TriageWorkflow"
 
-# 本地开发配置
+# Local configuration
 [vars]
 ENVIRONMENT = "development"
 AI_SEARCH_NAME = "delicate-leaf-e8d2"
