@@ -1,7 +1,7 @@
 {
   "name": "feedback-hub",
   "version": "1.0.0",
-  "description": "Cloudflare 产品反馈智能分析平台",
+  "description": "Cloudflare Triage Copilot",
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
