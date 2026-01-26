@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Chelsea Xiao" />
+  <title>Feedback Triage Copilot</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style>
+    @media print {
+      @page { margin: 1in; }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 8.5in;
+      margin: 0 auto;
+      padding: 1in;
+      color: #24292e;
+    }
+    h1 {
+      border-bottom: 2px solid #f97316;
+      padding-bottom: 0.3em;
+      margin-top: 1.5em;
+      page-break-before: always;
+    }
+    h1:first-of-type { page-break-before: avoid; }
+    h2 {
+      border-bottom: 1px solid #eaecef;
+      padding-bottom: 0.2em;
+      margin-top: 1.2em;
+    }
+    h3 { margin-top: 1em; color: #0969da; font-weight: 600; }
+    code {
+      background: #f6f8fa;
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-family: "SF Mono", Consolas, monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+      border-left: 3px solid #f97316;
+    }
+    pre code {
+      background: none;
+      padding: 0;
+    }
+    a { color: #0969da; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    blockquote {
+      border-left: 4px solid #f97316;
+      padding-left: 1em;
+      color: #57606a;
+      margin-left: 0;
+    }
+    #TOC {
+      background: #f6f8fa;
+      padding: 1em;
+      border-radius: 6px;
+      margin-bottom: 2em;
+    }
+    #TOC ul { padding-left: 1.5em; }
+    .title {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #f97316;
+      margin-bottom: 0.2em;
+    }
+    .subtitle {
+      font-size: 1.3em;
+      color: #57606a;
+      margin-bottom: 0.2em;
+    }
+    .author, .date {
+      color: #57606a;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Feedback Triage Copilot</h1>
+<p class="subtitle">Cloudflare Developer Platform Challenge Submission</p>
+<p class="author">Chelsea Xiao</p>
+<p class="date">January 2026</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#project-links">Project Links</a></li>
+<li><a href="#product-insights-friction-points-suggestions">Product Insights: Friction Points &amp; Suggestions</a>
+<ul>
+<li><a href="#r2-bucket-creation-requires-dashboard-onboarding-first">1. R2 Bucket Creation Requires Dashboard Onboarding First</a></li>
+<li><a href="#workflows-local-development-uses-remote-instances">2. Workflows Local Development Uses Remote Instances</a></li>
+<li><a href="#missing-r2-binding-blocks-entire-deployment">3. Missing R2 Binding Blocks Entire Deployment</a></li>
+<li><a href="#workers-ai-structured-output-requires-heavy-prompt-engineering">4. Workers AI Structured Output Requires Heavy Prompt Engineering</a></li>
+<li><a href="#ai-search-setup-requires-manual-r2-corpus-population">5. AI Search Setup Requires Manual R2 Corpus Population</a></li>
+</ul></li>
+<li><a href="#architecture-overview">Architecture Overview</a>
+<ul>
+<li><a href="#cloudflare-products-used">Cloudflare Products Used</a></li>
+<li><a href="#data-flow-architecture">Data Flow Architecture</a></li>
+<li><a href="#workers-bindings-configuration">Workers Bindings Configuration</a></li>
+</ul></li>
+<li><a href="#vibe-coding-context">Vibe-Coding Context</a>
+<ul>
+<li><a href="#platform-used">Platform Used</a></li>
+<li><a href="#key-prompts-used">Key Prompts Used</a></li>
+</ul></li>
+<li><a href="#key-achievements">Key Achievements</a></li>
+</ul>
+</nav>
+<h1 id="project-links">Project Links</h1>
+<p><strong>Live Demo:</strong><br />
+https://feedback-triage.chelsea259288.workers.dev</p>
+<p><strong>GitHub Repository:</strong><br />
+https://github.com/chelsea259288-dev/feedback-triage-copilot</p>
+<h1 id="product-insights-friction-points-suggestions">Product Insights: Friction Points &amp; Suggestions</h1>
+<p>During the development of this prototype, I encountered several friction points that could be improved to enhance the developer experience on Cloudflare’s platform. Below are detailed observations with actionable suggestions.</p>
+<h2 id="r2-bucket-creation-requires-dashboard-onboarding-first">1. R2 Bucket Creation Requires Dashboard Onboarding First</h2>
+<h3 id="title">Title</h3>
+<p>R2 Bucket Creation Requires Dashboard Onboarding First</p>
+<h3 id="problem">Problem</h3>
+<p>Running <code>wrangler r2 bucket create &lt;name&gt;</code> fails with error code 10042: “Please enable R2 through the Cloudflare Dashboard.” This is a hidden prerequisite not mentioned in CLI output, forcing developers to switch from terminal to browser mid-workflow. New developers expect CLI-first workflows to be self-contained, but the lack of a direct link to R2 onboarding in the error message interrupts development flow at a critical moment and blocks rapid prototyping.</p>
+<h3 id="suggestion">Suggestion</h3>
+<p><strong>1. Improve error messages with actionable links:</strong></p>
+<pre><code>R2 is not enabled for your account.
+
+Enable R2 now:
+→ https://dash.cloudflare.com/&lt;account-id&gt;/r2/overview/onboarding
+
+After enabling, retry: wrangler r2 bucket create &lt;name&gt;</code></pre>
+<p><strong>2. Add a pre-flight check command:</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wrangler</span> r2 check-subscription</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Returns: ✓ R2 enabled | ✗ R2 not enabled (enable at: &lt;link&gt;)</span></span></code></pre></div>
+<p><strong>3. Consider auto-open browser option:</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wrangler</span> r2 bucket create <span class="op">&lt;</span>name<span class="op">&gt;</span> --enable-interactive</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Detects missing subscription → opens browser → waits for confirmation</span></span></code></pre></div>
+<h2 id="workflows-local-development-uses-remote-instances">2. Workflows Local Development Uses Remote Instances</h2>
+<h3 id="title-1">Title</h3>
+<p>Workflows Local Development Uses Remote Instances (Unlike Other Bindings)</p>
+<h3 id="problem-1">Problem</h3>
+<p>Unlike D1, R2, and KV, Workflows in <code>wrangler dev</code> connect to remote deployed instances, not local simulation. Running <code>env.WORKFLOW.create()</code> in local dev returns an instance ID, but <code>wrangler workflows instances describe &lt;id&gt;</code> fails with “workflow.not_found” because the Workflow must be deployed first. This is highly counter-intuitive since all other bindings work locally without deployment. The <code>wrangler dev</code> output shows “connected to remote resource” but this critical caveat is easy to miss, creating a confusing error loop and adding a mandatory deployment step before local testing.</p>
+<h3 id="suggestion-1">Suggestion</h3>
+<p><strong>1. Enhance <code>wrangler dev</code> output:</strong></p>
+<pre><code>⚡ Bindings:
+- D1 (feedback_db): using local database
+- R2 (CORPUS): using local bucket
+- Workflows (TRIAGE_WORKFLOW): ⚠️  REQUIRES DEPLOYMENT
+  → Run &#39;wrangler deploy&#39; first to enable Workflows in local dev</code></pre>
+<p><strong>2. Improve error messages:</strong></p>
+<pre><code>Workflow &#39;triage-workflow&#39; not found [code: 10200]
+
+Possible causes:
+1. Workflow never deployed → Run: wrangler deploy
+2. Workflow name mismatch in wrangler.toml
+3. Using wrong account/API token</code></pre>
+<p><strong>3. Update documentation with prominent callout:</strong></p>
+<blockquote>
+<p><strong>Warning:</strong> Unlike D1/R2, Workflows require deployment before local testing</p>
+</blockquote>
+<h2 id="missing-r2-binding-blocks-entire-deployment">3. Missing R2 Binding Blocks Entire Deployment</h2>
+<h3 id="title-2">Title</h3>
+<p>Missing R2 Binding Blocks Entire Deployment (Even for Optional Features)</p>
+<h3 id="problem-2">Problem</h3>
+<p>When an R2 bucket binding is added to <code>wrangler.toml</code> for an optional feature, <code>wrangler deploy</code> fails completely with error code 10085: “R2 bucket not found,” even though R2 is optional (app has fallback logic), the code has proper error handling for missing binding, and all critical bindings (D1, AI, Workflows) are correctly configured. This prevents iterative development by forcing an all-or-nothing deployment model. Developers cannot deploy a working MVP first, then add optional features later. This breaks progressive enhancement patterns and wastes time requiring developers to comment out bindings before deployment.</p>
+<h3 id="suggestion-2">Suggestion</h3>
+<p><strong>1. Add optional binding support:</strong></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode toml"><code class="sourceCode toml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span><span class="dt">r2_buckets</span><span class="kw">]]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">&quot;CORPUS&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="dt">bucket_name</span> <span class="op">=</span> <span class="st">&quot;feedback-triage-corpus&quot;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">required</span> <span class="op">=</span> <span class="cn">false</span>  <span class="co"># ← Allow deployment even if bucket doesn&#39;t exist</span></span></code></pre></div>
+<p><strong>2. Improve deployment error messages:</strong></p>
+<pre><code>R2 bucket &#39;feedback-triage-corpus&#39; not found.
+
+Options:
+1. Create bucket: wrangler r2 bucket create feedback-triage-corpus
+2. Deploy without R2: Comment out [[r2_buckets]] in wrangler.toml
+3. Use existing bucket: Update bucket_name in wrangler.toml</code></pre>
+<p><strong>3. Add <code>--ignore-missing-bindings</code> flag:</strong></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wrangler</span> deploy <span class="at">--ignore-missing-bindings</span><span class="op">=</span>r2,kv</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Validates critical bindings, allows optional ones to be missing</span></span></code></pre></div>
+<h2 id="workers-ai-structured-output-requires-heavy-prompt-engineering">4. Workers AI Structured Output Requires Heavy Prompt Engineering</h2>
+<h3 id="title-3">Title</h3>
+<p>Workers AI Structured Output Requires Heavy Prompt Engineering</p>
+<h3 id="problem-3">Problem</h3>
+<p>Initial AI prompts produced inconsistent results: urgency returned as “High” instead of “P0-P3” format, category was vague (“General”) instead of specific (“Bug”, “Feature”), and theme was too generic (“User feedback”) instead of actionable (“Wrangler deploy timeout”). After extensive prompt refinement with explicit examples and format constraints, quality improved significantly. However, Workers AI documentation lacks guidance on structuring prompts for structured output. Unlike OpenAI’s function calling, Workers AI requires manual JSON parsing and validation. Trial and error is expensive in both time and AI tokens, and debugging failures is difficult.</p>
+<h3 id="what-worked">What Worked</h3>
+<p><strong>Before (Generic prompt):</strong></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Analyze this feedback and extract key information&quot;</span></span></code></pre></div>
+<p><strong>After (Specific format with examples):</strong></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>const prompt <span class="op">=</span> <span class="vs">`Analyze feedback and return JSON with exact fields:</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="vs">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="vs">  &quot;urgency&quot;: &quot;P0|P1|P2|P3&quot;,  // P0=critical, P1=major, P2=minor, P3=low</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="vs">  &quot;category&quot;: &quot;Bug|Feature|Docs|Performance&quot;,</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="vs">  &quot;theme&quot;: &quot;short actionable phrase&quot;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="vs">}</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="vs">Examples:</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="vs">- &quot;Deploy keeps timing out&quot; → urgency: P1, category: Bug</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="vs">- &quot;Add dark mode please&quot; → urgency: P3, category: Feature</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="vs">Feedback: </span><span class="sc">${</span>text<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span></code></pre></div>
+<h3 id="suggestion-3">Suggestion</h3>
+<p><strong>1. Add Workers AI Cookbook for structured output:</strong></p>
+<ul>
+<li>Provide prompt templates for common use cases</li>
+<li>Show how to enforce JSON schema in prompts</li>
+<li>Include retry strategies for malformed outputs</li>
+</ul>
+<p><strong>2. Add JSON Schema validation helper:</strong></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>const result <span class="op">=</span> await env<span class="op">.</span><span class="at">AI</span><span class="op">.</span><span class="fu">run</span>(<span class="st">&#39;@cf/meta/llama-3.3-70b-instruct-fp8-fast&#39;</span><span class="op">,</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  messages<span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  response_format<span class="op">:</span> {  <span class="co">// ← New parameter</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    type<span class="op">:</span> <span class="st">&quot;json_object&quot;</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    schema<span class="op">:</span> { </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>      urgency<span class="op">:</span> { type<span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> enum<span class="op">:</span> [<span class="st">&quot;P0&quot;</span><span class="op">,</span> <span class="st">&quot;P1&quot;</span><span class="op">,</span> <span class="st">&quot;P2&quot;</span><span class="op">,</span> <span class="st">&quot;P3&quot;</span>] }</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p><strong>3. Better error messages from AI runtime:</strong></p>
+<ul>
+<li>Show partial output when JSON parsing fails</li>
+<li>Suggest prompt improvements based on common failure patterns</li>
+</ul>
+<h2 id="ai-search-setup-requires-manual-r2-corpus-population">5. AI Search Setup Requires Manual R2 Corpus Population</h2>
+<h3 id="title-4">Title</h3>
+<p>AI Search Setup Requires Manual R2 Corpus Population</p>
+<h3 id="problem-4">Problem</h3>
+<p>AI Search documentation focuses on querying but lacks guidance on initial corpus setup. File format requirements for R2 documents are unclear, there are no built-in utilities for bulk-uploading structured data, and developers must discover optimal document structure through trial and error. This slows down development significantly as developers need to experiment with different formats to understand what works best for semantic search indexing.</p>
+<h3 id="suggestion-4">Suggestion</h3>
+<p><strong>1. Provide R2 corpus setup examples:</strong></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Bulk upload structured data for AI Search</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>const documents <span class="op">=</span> await db<span class="op">.</span><span class="fu">query</span>(<span class="st">&quot;SELECT id, title, body FROM feedback&quot;</span>)<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">for</span> (const doc of documents) {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  await env<span class="op">.</span><span class="at">CORPUS</span><span class="op">.</span><span class="fu">put</span>(<span class="vs">`feedback-</span><span class="sc">${</span>doc<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">.txt`</span><span class="op">,</span> doc<span class="op">.</span><span class="at">body</span><span class="op">,</span> {</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    customMetadata<span class="op">:</span> { title<span class="op">:</span> doc<span class="op">.</span><span class="at">title</span><span class="op">,</span> id<span class="op">:</span> doc<span class="op">.</span><span class="at">id</span> }</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>2. Add wrangler command for AI Search setup:</strong></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wrangler</span> ai-search sync <span class="at">--bucket</span><span class="op">=</span>CORPUS <span class="at">--ai-search</span><span class="op">=</span>instance-name</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Auto-syncs R2 bucket to AI Search instance</span></span></code></pre></div>
+<p><strong>3. Document best practices:</strong></p>
+<ul>
+<li>Optimal file size for semantic search</li>
+<li>Metadata usage for filtering</li>
+<li>Chunking strategies for long documents</li>
+</ul>
+<h1 id="architecture-overview">Architecture Overview</h1>
+<p>This prototype demonstrates deep integration across 6 Cloudflare Developer Platform products.</p>
+<h2 id="cloudflare-products-used">Cloudflare Products Used</h2>
+<h3 id="cloudflare-workers-edge-compute">1. Cloudflare Workers (Edge Compute)</h3>
+<p><strong>Purpose:</strong> Hosts entire application (API + static frontend) at the edge for global low-latency access.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li>Serves static HTML dashboard</li>
+<li>Handles all REST API endpoints (<code>/api/inbox</code>, <code>/api/themes</code>, <code>/api/search</code>, <code>/api/ask</code>)</li>
+<li>Orchestrates Workflows for async processing</li>
+<li>Integrates all other bindings (D1, R2, AI, AI Search)</li>
+</ul>
+<h3 id="d1-database-serverless-sql">2. D1 Database (Serverless SQL)</h3>
+<p><strong>Purpose:</strong> Stores structured feedback data with complex queries for filtering, aggregation, and theme detection.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li><strong><code>feedback_raw</code> table:</strong> Stores incoming feedback with source, URL, metadata</li>
+<li><strong><code>feedback_ai</code> table:</strong> Stores AI analysis results (urgency, sentiment, category, theme, summary)</li>
+<li><strong><code>theme_daily</code> table:</strong> Daily theme aggregation for trend analysis</li>
+<li>Complex SQL queries for duplicate detection, theme aggregation, and time-range filtering</li>
+</ul>
+<h3 id="workflows-durable-execution">3. Workflows (Durable Execution)</h3>
+<p><strong>Purpose:</strong> Ensures reliable, idempotent processing of feedback analysis pipeline.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li><strong>Three-step pipeline:</strong> Deduplicate → AI Analyze → Write Back &amp; Aggregate</li>
+<li><strong>Idempotency:</strong> Content hash prevents duplicate processing</li>
+<li><strong>Error handling:</strong> Retries transient failures with exponential backoff</li>
+<li><strong>Observability:</strong> Tracks workflow status for debugging</li>
+</ul>
+<h3 id="workers-ai-on-demand-inference">4. Workers AI (On-demand Inference)</h3>
+<p><strong>Purpose:</strong> Performs real-time AI analysis without managing infrastructure.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li><strong>Model:</strong> <code>@cf/meta/llama-3.3-70b-instruct-fp8-fast</code></li>
+<li><strong>Analysis tasks:</strong>
+<ul>
+<li>Sentiment classification (positive/neutral/negative + score)</li>
+<li>Urgency prioritization (P0-P3)</li>
+<li>Category detection (Bug/Feature/Docs/Performance)</li>
+<li>Theme extraction (actionable short phrases)</li>
+<li>Summary generation (1-2 sentences)</li>
+<li>Next-action recommendation</li>
+</ul></li>
+</ul>
+<h3 id="r2-object-storage-unlimited-storage">5. R2 Object Storage (Unlimited Storage)</h3>
+<p><strong>Purpose:</strong> Stores full-text corpus for semantic search indexing.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li><strong>Document format:</strong> Each analyzed feedback saved as JSON (e.g., <code>feedback/workers/123.json</code>)</li>
+<li><strong>Metadata:</strong> Includes <code>raw_id</code>, <code>title</code>, <code>product_area</code> for result enrichment</li>
+<li><strong>Integration:</strong> Feeds AI Search for semantic retrieval</li>
+</ul>
+<h3 id="ai-search-semantic-search-rag">6. AI Search (Semantic Search + RAG)</h3>
+<p><strong>Purpose:</strong> Enables natural language querying over feedback corpus with source attribution.</p>
+<p><strong>Usage:</strong></p>
+<ul>
+<li><strong>Semantic similarity search:</strong> Find related feedback items</li>
+<li><strong>RAG-based Q&amp;A:</strong> Answer questions with source citations</li>
+<li><strong>Fallback:</strong> Keyword-based search when AI Search unavailable</li>
+</ul>
+<h2 id="data-flow-architecture">Data Flow Architecture</h2>
+<p>The system processes feedback through the following pipeline:</p>
+<h3 id="feedback-ingestion">1. Feedback Ingestion</h3>
+<pre><code>User → Worker API (/api/ingest) → D1 (feedback_raw) → Workflow.create()</code></pre>
+<h3 id="async-processing-workflow">2. Async Processing (Workflow)</h3>
+<pre><code>Step A: Deduplicate     → Check URL + content hash in D1
+Step B: AI Analyze      → Workers AI (Llama 3.3)
+Step C: Write &amp; Aggregate → D1 (feedback_ai + theme_daily) + R2 corpus</code></pre>
+<h3 id="semantic-search">3. Semantic Search</h3>
+<pre><code>User query → AI Search → R2 corpus → Ranked results → API → UI</code></pre>
+<h3 id="rag-ask">4. RAG (Ask)</h3>
+<pre><code>Question → AI Search.ask() → Retrieve sources → LLM synthesis → Answer</code></pre>
+<h2 id="workers-bindings-configuration">Workers Bindings Configuration</h2>
+<p>The application uses the following bindings configured in <code>wrangler.toml</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode toml"><code class="sourceCode toml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">&quot;feedback-triage&quot;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span><span class="dt">d1_databases</span><span class="kw">]]</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">&quot;DB&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="dt">database_name</span> <span class="op">=</span> <span class="st">&quot;feedback_db&quot;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="dt">database_id</span> <span class="op">=</span> <span class="st">&quot;&lt;your-database-id&gt;&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span><span class="dt">workflows</span><span class="kw">]]</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">&quot;TRIAGE_WORKFLOW&quot;</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">&quot;triage-workflow&quot;</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="dt">class_name</span> <span class="op">=</span> <span class="st">&quot;TriageWorkflow&quot;</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="kw">[</span><span class="dt">ai</span><span class="kw">]</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">&quot;AI&quot;</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="kw">[[</span><span class="dt">r2_buckets</span><span class="kw">]]</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">&quot;CORPUS&quot;</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="dt">bucket_name</span> <span class="op">=</span> <span class="st">&quot;feedback-triage-corpus&quot;</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="kw">[</span><span class="dt">vars</span><span class="kw">]</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="dt">ENVIRONMENT</span> <span class="op">=</span> <span class="st">&quot;production&quot;</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="dt">AI_SEARCH_NAME</span> <span class="op">=</span> <span class="st">&quot;delicate-leaf-e8d2&quot;</span></span></code></pre></div>
+<h1 id="vibe-coding-context">Vibe-Coding Context</h1>
+<h2 id="platform-used">Platform Used</h2>
+<p><strong>OpenCode (Anomaly AI)</strong> - AI-powered coding assistant with deep Cloudflare platform integration</p>
+<h2 id="key-prompts-used">Key Prompts Used</h2>
+<h3 id="initial-architecture-design">1. Initial Architecture Design</h3>
+<pre><code>Design a feedback triage system using Cloudflare Workers, D1, and AI. 
+Include async processing for AI analysis and semantic search capabilities.
+Focus on scalability and cost-efficiency.</code></pre>
+<h3 id="workflows-implementation">2. Workflows Implementation</h3>
+<pre><code>Implement a Workflows pipeline for feedback processing:
+1. Deduplicate using content hashing
+2. Analyze with Workers AI (sentiment, urgency, theme)
+3. Store results in D1
+4. Aggregate themes
+5. Write to R2 corpus for AI Search
+Ensure idempotency and error handling.</code></pre>
+<h3 id="ai-search-integration">3. AI Search Integration</h3>
+<pre><code>Integrate AI Search for:
+- Semantic similarity search over feedback
+- RAG-based question answering with source attribution
+- Similar feedback detection
+Add fallback to keyword search if AI Search unavailable.</code></pre>
+<h3 id="frontend-dashboard">4. Frontend Dashboard</h3>
+<pre><code>Build a single-page dashboard with:
+- Stat cards (total, P0 count, today&#39;s feedback, unanalyzed)
+- Filterable inbox (source, product, category, urgency)
+- Theme aggregation view
+- Search tab with semantic search and Ask (RAG) modes
+Use vanilla JS, no frameworks. Clean, modern UI.</code></pre>
+<h3 id="friction-point-documentation">5. Friction Point Documentation</h3>
+<pre><code>Document all developer friction encountered during development:
+- R2 onboarding requirements
+- Workflows local dev behavior
+- Missing binding deployment blockers
+- AI prompt engineering challenges
+Provide actionable suggestions for each.</code></pre>
+<h1 id="key-achievements">Key Achievements</h1>
+<p>This prototype demonstrates the following accomplishments:</p>
+<ul>
+<li><strong>Full-stack serverless application</strong> with zero traditional infrastructure</li>
+<li><strong>Multi-product integration</strong> showcasing 6 Cloudflare products working together</li>
+<li><strong>Production-ready error handling</strong> with graceful fallbacks for optional features</li>
+<li><strong>Real-world friction documentation</strong> with actionable suggestions for platform improvements</li>
+<li><strong>Semantic search + RAG</strong> implementation using AI Search</li>
+<li><strong>Async workflow orchestration</strong> for reliable background processing</li>
+<li><strong>Clean architecture</strong> with clear separation of concerns</li>
+</ul>
+<hr />
+<p><strong>Built with Cloudflare Developer Platform</strong><br />
+January 2026</p>
+</body>
+</html>
