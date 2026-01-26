@@ -7,10 +7,10 @@
 ## Project Links
 
 ### Live Demo
-** Deployed Application:** https://feedback-triage.chelsea259288.workers.dev
+Deployed Application: https://feedback-triage.chelsea259288.workers.dev
 
 ### Source Code
-** GitHub Repository:** https://github.com/chelsea259288-dev/feedback-triage-copilot
+GitHub Repository: https://github.com/chelsea259288-dev/feedback-triage-copilot
 
 ---
 
