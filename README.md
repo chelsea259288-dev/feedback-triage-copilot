@@ -23,10 +23,9 @@ Feedback Triage Copilot is a production-ready feedback management system that de
 
 ### Technology Stack
 
-- TypeScript (Backend)
-- Vanilla JavaScript (Frontend)
-- SQL (D1 Database)
-- Llama 3.3 70B (AI Model)
+- Opencode
+- Claude Sonnet 4.5 --Build
+- GPT-5.2 --Plan
 
 ## 🚀 Quick Start
 
