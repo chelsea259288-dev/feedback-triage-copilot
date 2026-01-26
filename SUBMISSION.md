@@ -241,7 +241,7 @@ Feedback: ${text}`;
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### Cloudflare Products Used
 
@@ -365,7 +365,7 @@ AI_SEARCH_NAME = "delicate-leaf-e8d2"
 
 ---
 
-## 🤖 Vibe-Coding Context (Optional)
+## Vibe-Coding Context 
 
 ### Platform Used
 **OpenCode (Anomaly AI)** - AI-powered coding assistant with deep Cloudflare platform integration
